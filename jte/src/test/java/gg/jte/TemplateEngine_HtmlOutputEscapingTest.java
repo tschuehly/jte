@@ -927,9 +927,17 @@ public class TemplateEngine_HtmlOutputEscapingTest {
     void onMethods() {
         codeResolver.givenCode("template.jte", "@param String userName\n\n<span onclick=\"showName('${userName}')\">Click me</span>");
 
-        templateEngine.render("template.jte", "'); alert('xss", output);
+        templateEngine.render("template.jte", "'\n); alert('xss", output);
 
-        assertThat(output.toString()).isEqualTo("\n<span onclick=\"showName('\\x27); alert(\\x27xss')\">Click me</span>");
+        assertThat(output.toString()).isEqualTo("\n<span onclick=\"showName('\\x27\\n); alert(\\x27xss')\">Click me</span>");
+    }
+    @Test
+    void alpineJs() {
+        codeResolver.givenCode("template.jte", "@param String userName\n\n<span x-init=\"showName('${userName}')\">Click me</span>");
+
+        templateEngine.render("template.jte", "\n'); alert('xss", output);
+
+        assertThat(output.toString()).isEqualTo("\n<span x-init=\"showName('\\x27\\n); alert(\\x27xss')\">Click me</span>");
     }
 
     @Test
